@@ -2,14 +2,14 @@ from __future__ import print_function
 import os
 import cv2 as cv
 import numpy as np
-from os import listdir
+
+import helper
 
 HEIGHT = -1
 WIDTH = -1
 NUM_PICS = -1
 SLICE_MAIN_WIDTH = 100 #TODO
 SLICE_BLEND_WIDTH = 40 #TODO
-SLICE_BLEND_GRADIENT = -1
 ALPHA = -1
 BETA = -1
 
@@ -41,20 +41,31 @@ for pic in pics:
 
 SLICE_BLEND_WIDTH = WIDTH - (NUM_PICS * SLICE_MAIN_WIDTH) #Get all non-main image area
 SLICE_BLEND_WIDTH /= (NUM_PICS - 1) #There are NUM_PICS-1 blend areas
-SLICE_BLEND_WIDTH = round(SLICE_MAIN_WIDTH)
-# SLICE_BLEND_GRADIENT is the percentage each pixel will decrease by as the gradient filter is applied
-SLICE_BLEND_GRADIENT = (100 / SLICE_BLEND_WIDTH) / 100
+SLICE_BLEND_WIDTH = round(SLICE_MAIN_WIDTH) # TODO make sur this works with round
 
 # Final image
-blended = np.zeros((WIDTH, HEIGHT, 3), np.uint8)
-pic_index = 0
+blended_image = np.zeros((WIDTH, HEIGHT, 3), np.uint8)
 
-for pic in pics:
-    if pic_index == 0:
-        # Do first things
-        for
-    elif pic_index == NUM_PICS:
-        # Do last things
+left_main_index_col = 0 # The left most main column of the image we're working on
+right_main_index_col = SLICE_MAIN_WIDTH #The right mose main column of the image
+left_blend_index_col = SLICE_MAIN_WIDTH # The column the gradients will be applied to when going left
+right_blend_index_col = SLICE_MAIN_WIDTH + SLICE_BLEND_WIDTH # The column the gradient will be applied going right
+
+for current_pic_index in range(len(pics)):
+    # Do first things
+    if current_pic_index == 0:
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
+        helper.add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col, right_blend_index_col)
+
+        left_main_index_col = right_blend_index_col + 1
+        right_main_index_col = left_main_index_col + SLICE_MAIN_WIDTH
+        left_blend_index_col = left_main_index_col - SLICE_BLEND_WIDTH
+        right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
+
+    # Do last things
+    elif current_pic_index == NUM_PICS - 1:
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, left_main_index_col + SLICE_MAIN_WIDTH)
+        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - SLICE_BLEND_WIDTH, )
     else:
         # Do normal things
 
