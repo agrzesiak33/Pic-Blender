@@ -18,17 +18,14 @@ pics = []
 print('Enter folder name')
 input_folder = input().strip()
 
-# Open all images and store in _pics_
 files = os.listdir(input_folder)
 
 if files.__sizeof__() == 0:
     print('No files found')
     exit(-1)
 
-i = 0
-for file in files:
+for file in range(len(files)):
     pics.append(cv.imread(cv.samples.findFile(f'{input_folder}/{files[i]}')))
-    i += 1
 
 # Ensure all images are the same size
 NUM_PICS = len(pics)
@@ -41,7 +38,7 @@ for pic in pics:
 
 SLICE_BLEND_WIDTH = WIDTH - (NUM_PICS * SLICE_MAIN_WIDTH) #Get all non-main image area
 SLICE_BLEND_WIDTH /= (NUM_PICS - 1) #There are NUM_PICS-1 blend areas
-SLICE_BLEND_WIDTH = round(SLICE_MAIN_WIDTH) # TODO make sur this works with round
+SLICE_BLEND_WIDTH = round(SLICE_MAIN_WIDTH)
 
 # Final image
 blended_image = np.zeros((WIDTH, HEIGHT, 3), np.uint8)
@@ -57,17 +54,23 @@ for current_pic_index in range(len(pics)):
         helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
         helper.add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col, right_blend_index_col)
 
-        left_main_index_col = right_blend_index_col + 1
-        right_main_index_col = left_main_index_col + SLICE_MAIN_WIDTH
-        left_blend_index_col = left_main_index_col - SLICE_BLEND_WIDTH
-        right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
-
     # Do last things
     elif current_pic_index == NUM_PICS - 1:
-        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, left_main_index_col + SLICE_MAIN_WIDTH)
-        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - SLICE_BLEND_WIDTH, )
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
+        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col, left_blend_index_col)
+
+    # Do normal things
     else:
-        # Do normal things
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
+        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col, left_blend_index_col)
+        helper.add_gradient_left(pics[current_pic_index], blended_image, right_main_index_col, right_blend_index_col)
+
+    left_main_index_col = right_blend_index_col + 1
+    right_main_index_col = left_main_index_col + SLICE_MAIN_WIDTH
+    left_blend_index_col = left_main_index_col - SLICE_BLEND_WIDTH
+    right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
+
+
 
 cv.imshow('pic', pics[1])
 cv.waitKey(0)
