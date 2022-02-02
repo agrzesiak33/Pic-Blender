@@ -8,8 +8,7 @@ import helper
 HEIGHT = -1
 WIDTH = -1
 NUM_PICS = -1
-SLICE_MAIN_WIDTH = 10 #TODO
-SLICE_BLEND_WIDTH = 40 #TODO
+SLICE_MAIN_WIDTH = 10
 ALPHA = -1
 BETA = -1
 
@@ -26,7 +25,7 @@ if files.__sizeof__() == 0:
     exit(-1)
 
 for file in range(len(files)):
-    pics.append(cv.imread(cv.samples.findFile(f'{input_folder}/{files[file]}')))
+    pics.append(cv.imread(cv.samples.findFile(f"{input_folder}/{files[file]}")))
 
 # Ensure all images are the same size
 NUM_PICS = len(pics)
@@ -73,28 +72,3 @@ for current_pic_index in range(len(pics)):
     right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
 
 helper.save_image(blended_image, 'out')
-"""print(''' Simple Linear Blender
------------------------
-* Enter alpha [0.0-1.0]: ''')
-input_alpha = float(input().strip())
-if 0 <= alpha <= 1:
-    alpha = input_alpha
-# [load]
-
-# [load]
-if src1 is None:
-    print("Error loading src1")
-    exit(-1)
-elif src2 is None:
-    print("Error loading src2")
-    exit(-1)
-# [blend_images]
-beta = (1.0 - alpha)
-dst = cv.addWeighted(src1, alpha, src2, beta, 0.0)
-# [blend_images]
-# [display]
-cv.imshow('dst', dst)
-cv.waitKey(0)
-# [display]
-cv.destroyAllWindows()
-"""
