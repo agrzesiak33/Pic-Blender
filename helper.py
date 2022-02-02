@@ -22,7 +22,6 @@ def add_gradient_left(pic, blended_pic, right_start, left_stop):
     current_col = right_start
 
     while current_col > left_stop and total_gradient >= 0:
-        #save_image(blended_pic, 'out')
         # Apply the gradient correction to all the pixels
         for current_row in range(height):
             pixel_to_add = pic[current_row][current_col]

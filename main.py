@@ -53,23 +53,23 @@ right_blend_index_col = SLICE_MAIN_WIDTH + SLICE_BLEND_WIDTH  # The column the g
 for current_pic_index in range(len(pics)):
     # Do first things
     if current_pic_index == 0:
-        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
-        helper.add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col, right_blend_index_col)
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col + 1)
+        helper.add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col + 1, right_blend_index_col + 1)
 
     # Do last things
     elif current_pic_index == NUM_PICS - 1:
-        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
-        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col, left_blend_index_col)
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col + 1)
+        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - 1, left_blend_index_col)
 
     # Do normal things
     else:
-        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col)
-        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col, left_blend_index_col)
-        helper.add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col, right_blend_index_col)
+        helper.transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col, right_main_index_col + 1)
+        helper.add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - 1, left_blend_index_col)
+        helper.add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col + 1, right_blend_index_col)
 
+    left_blend_index_col = right_main_index_col + 1
     left_main_index_col = right_blend_index_col + 1
-    right_main_index_col = left_main_index_col + SLICE_MAIN_WIDTH
-    left_blend_index_col = left_main_index_col - SLICE_BLEND_WIDTH
+    right_main_index_col = left_main_index_col + SLICE_MAIN_WIDTH - 1
     right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
 
 helper.save_image(blended_image, 'out')
