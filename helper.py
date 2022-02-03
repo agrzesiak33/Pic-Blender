@@ -56,7 +56,6 @@ def add_gradient_right(pic, blended_pic, left_start, right_stop, src_right_start
 
     height = len(pic)
     total_gradient = 1
-    current_row = 0
     current_col = left_start
 
     current_src_col = src_right_start
@@ -93,9 +92,58 @@ def save_image(pic, name):
     cv.imwrite(f'pics/{name}.png', pic)
 
 
+def whole_image_blend(pics, blended_image, main_width):
+    # Ensure all images are the same size
+    NUM_PICS = len(pics)
+    WIDTH = len(pics[0][0])
+    HEIGHT = len(pics[0])
+    for pic in pics:
+        if len(pic[0]) != WIDTH or len(pic) != HEIGHT:
+            print('Not all images are the same size')
+            exit(-1)
+
+    SLICE_BLEND_WIDTH = WIDTH - (NUM_PICS * main_width) - 1  # Get all non-main image area
+    SLICE_BLEND_WIDTH /= (NUM_PICS - 1)  # There are NUM_PICS-1 blend areas
+    SLICE_BLEND_WIDTH = round(SLICE_BLEND_WIDTH)
+
+    left_main_index_col = 0  # The left most main column of the image we're working on
+    right_main_index_col = main_width - 1  # The right mose main column of the image
+    left_blend_index_col = -  1  # The column the gradients will be applied to when going left
+    # ^^^^^^^^^^^DOESN'T GET USED UNTIL AFTER FIRST PIC IS PROCESSED
+    right_blend_index_col = main_width + SLICE_BLEND_WIDTH  # The column the gradient will be applied going right
+
+    for current_pic_index in range(len(pics)):
+        # Do first things
+        if current_pic_index == 0:
+            transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col,
+                                  right_main_index_col + 1)
+            add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col + 1,
+                               right_blend_index_col + 1)
+
+        # Do last things
+        elif current_pic_index == NUM_PICS - 1:
+            transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col,
+                                  right_main_index_col + 1)
+            add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - 1,
+                              left_blend_index_col)
+
+        # Do normal things
+        else:
+            transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col,
+                                  right_main_index_col + 1)
+            add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - 1,
+                              left_blend_index_col)
+            add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col + 1,
+                               right_blend_index_col)
+
+        left_blend_index_col = right_main_index_col + 1
+        left_main_index_col = right_blend_index_col + 1
+        right_main_index_col = left_main_index_col + main_width - 1
+        right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
+
+
 def middle_only_blend(pics, blended_image, main_width):
     # Only takes the middle main_size of every image and blends left and right appropriately
-    HEIGHT = len(pics[0])
     WIDTH = len(pics[0][0])
     NUM_PICS = len(pics)
 
@@ -123,5 +171,31 @@ def middle_only_blend(pics, blended_image, main_width):
     left_source_main = (WIDTH / 2) - (main_width / 2)
     right_source_main = left_source_main + main_width - 1  # The -1 is because the front and end index are inclusive
 
-    return 1
+    for current_pic_index in range(len(pics)):
+        # Do first things
+        if current_pic_index == 0:
+            transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col,
+                                  right_main_index_col + 1, left_source_main)
+            add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col + 1,
+                               right_blend_index_col + 1, right_source_main + 1)
 
+        # Do last things
+        elif current_pic_index == NUM_PICS - 1:
+            transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col,
+                                  right_main_index_col + 1, left_source_main)
+            add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - 1,
+                              left_blend_index_col, left_source_main - 1)
+
+        # Do normal things
+        else:
+            transfer_main_columns(pics[current_pic_index], blended_image, left_main_index_col,
+                                  right_main_index_col + 1, left_source_main)
+            add_gradient_left(pics[current_pic_index], blended_image, left_main_index_col - 1,
+                              left_blend_index_col, left_source_main - 1)
+            add_gradient_right(pics[current_pic_index], blended_image, right_main_index_col + 1,
+                               right_blend_index_col, right_source_main + 1)
+
+        left_blend_index_col = right_main_index_col + 1
+        left_main_index_col = right_blend_index_col + 1
+        right_main_index_col = left_main_index_col + main_width - 1
+        right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
