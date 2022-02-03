@@ -9,8 +9,6 @@ HEIGHT = -1
 WIDTH = -1
 NUM_PICS = -1
 SLICE_MAIN_WIDTH = 10
-ALPHA = -1
-BETA = -1
 
 pics = []
 # Get input from user where the pictures are
