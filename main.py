@@ -25,7 +25,10 @@ if files.__sizeof__() == 0:
 for file in range(len(files)):
     pics.append(cv.imread(cv.samples.findFile(f"{input_folder}/{files[file]}")))
 
+HEIGHT = len(pics[0])
+WIDTH = len(pics[0][0])
 blended_image = np.zeros((HEIGHT, WIDTH, 3), np.uint8)
 
+helper.whole_image_blend(pics, blended_image, SLICE_MAIN_WIDTH)
 
 helper.save_image(blended_image, 'out')
