@@ -5,30 +5,17 @@ import numpy as np
 
 import helper
 
-HEIGHT = -1
-WIDTH = -1
-NUM_PICS = -1
-SLICE_MAIN_WIDTH = 10
+"""
+merge_whole = helper.PicMerge()
+merge_whole.load_pics('pics')
+merge_whole.set_main_width(10)
+merge_whole.whole_image_blend()
+helper.save_image(merge_whole.blended_pic, 'out')
+"""
 
-pics = []
-# Get input from user where the pictures are
-#print('Enter folder name')
-input_folder = 'pics'
-#input_folder = input().strip()
+merge_middle = helper.PicMerge()
+merge_middle.load_pics('middle pics')
+merge_middle.set_main_width(10)
+merge_middle.middle_only_blend()
+helper.save_image(merge_middle.blended_pic, 'out')
 
-files = os.listdir(input_folder)
-
-if files.__sizeof__() == 0:
-    print('No files found')
-    exit(-1)
-
-for file in range(len(files)):
-    pics.append(cv.imread(cv.samples.findFile(f"{input_folder}/{files[file]}")))
-
-HEIGHT = len(pics[0])
-WIDTH = len(pics[0][0])
-blended_image = np.zeros((HEIGHT, WIDTH, 3), np.uint8)
-
-helper.whole_image_blend(pics, blended_image, SLICE_MAIN_WIDTH)
-
-helper.save_image(blended_image, 'out')
