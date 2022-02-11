@@ -23,19 +23,22 @@ class PicMerge:
             self.pics.append(cv.imread(cv.samples.findFile(f"{filename}/{files[file]}")))
         self.WIDTH = len(self.pics[0][0])
         self.HEIGHT = len(self.pics[0])
+        self.BLENDED_WIDTH = self.WIDTH
+        self.BLENDED_HEIGHT = self.HEIGHT
 
         # By default, it will make the output image as large as one imported image
         self.blended_pic = np.zeros((self.HEIGHT, self.WIDTH, 3), np.uint8)
 
-    def set_blended_image_size(self, height, width):
-        self.blended_pic = np.zeros((height, width, 3), np.uint8)
-        self.BLENDED_HEIGHT = height
+    def set_blended_image_width(self, width):
+        self.blended_pic = np.zeros((self.HEIGHT, width, 3), np.uint8)
         self.BLENDED_WIDTH = width
 
     def set_main_width(self, main_width):
         self.main_width = main_width
 
     def transfer_main_columns(self, from_pic, start_column, end_column, src_start=-1):
+        if end_column >= self.BLENDED_WIDTH:
+            end_column = self.BLENDED_WIDTH - 1
         height = len(from_pic)
         current_src_col = src_start
         if current_src_col == -1:
@@ -161,7 +164,7 @@ class PicMerge:
         if self.main_width % 2 != 0:
             self.main_width += 1
 
-        SLICE_BLEND_WIDTH = self.WIDTH - (self.NUM_PICS * self.main_width) - 1  # Get all non-main image area
+        SLICE_BLEND_WIDTH = self.BLENDED_WIDTH - (self.NUM_PICS * self.main_width)  # Get all non-main image area
         SLICE_BLEND_WIDTH /= (self.NUM_PICS - 1)  # There are NUM_PICS-1 blend areas
         SLICE_BLEND_WIDTH = round(SLICE_BLEND_WIDTH)
 
@@ -188,6 +191,7 @@ class PicMerge:
                                            right_main_index_col + 1, left_source_main)
                 self.add_gradient_right(self.pics[current_pic_index], right_main_index_col + 1,
                                         right_blend_index_col + 1, right_source_main + 1)
+                save_image(self.blended_pic, 'out')
 
             # Do last things
             elif current_pic_index == self.NUM_PICS - 1:
@@ -200,10 +204,13 @@ class PicMerge:
             else:
                 self.transfer_main_columns(self.pics[current_pic_index], left_main_index_col,
                                            right_main_index_col + 1, left_source_main)
+                save_image(self.blended_pic, 'out')
                 self.add_gradient_left(self.pics[current_pic_index], left_main_index_col - 1,
                                        left_blend_index_col, left_source_main - 1)
+                save_image(self.blended_pic, 'out')
                 self.add_gradient_right(self.pics[current_pic_index], right_main_index_col + 1,
                                         right_blend_index_col, right_source_main + 1)
+                save_image(self.blended_pic, 'out')
 
             left_blend_index_col = right_main_index_col + 1
             left_main_index_col = right_blend_index_col + 1

@@ -15,7 +15,8 @@ helper.save_image(merge_whole.blended_pic, 'out')
 
 merge_middle = helper.PicMerge()
 merge_middle.load_pics('middle pics')
-merge_middle.set_main_width(10)
+merge_middle.set_main_width(20)
+merge_middle.set_blended_image_width(merge_middle.BLENDED_WIDTH+33)
 merge_middle.middle_only_blend()
 helper.save_image(merge_middle.blended_pic, 'out')
 
