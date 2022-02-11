@@ -37,6 +37,7 @@ class PicMerge:
         self.main_width = main_width
 
     def transfer_main_columns(self, from_pic, start_column, end_column, src_start=-1):
+        print('Transferring main cols')
         if end_column >= self.BLENDED_WIDTH:
             end_column = self.BLENDED_WIDTH - 1
         height = len(from_pic)
@@ -50,6 +51,7 @@ class PicMerge:
             current_src_col += 1
 
     def add_gradient_left(self, pic, right_start, left_stop, src_left_start=-1):
+        print('Adding gradient left')
         # Get percentage of gradient per column
         gradient_step = 100 / (right_start - left_stop)
         # Get decimal version of the percent
@@ -83,6 +85,7 @@ class PicMerge:
             total_gradient -= gradient_step
 
     def add_gradient_right(self, pic, left_start, right_stop, src_right_start=-1):
+        print('Adding Gradient right')
         # Get percentage of gradient per column
         gradient_step = 100 / (right_stop - left_start)
         # Get decimal version of the percent
@@ -114,6 +117,37 @@ class PicMerge:
             current_col += 1
             total_gradient -= gradient_step
 
+    # Only works for 2 images
+    def correct_camera_movement(self, num_pixels):
+        num_pixels = int(num_pixels)
+        if num_pixels % 2 != 0:
+            num_pixels = int(num_pixels - 1)
+
+        original_width = self.WIDTH
+
+        if self.NUM_PICS != 2:
+            exit(-1)
+        else:
+            self.blended_pic = self.blended_pic = np.zeros((self.HEIGHT, self.WIDTH + num_pixels, 3), np.uint8)
+
+            left_image = np.zeros((self.HEIGHT, self.WIDTH + int((num_pixels / 2)), 3), np.uint8)
+            right_image = np.zeros((self.HEIGHT, self.WIDTH + int((num_pixels / 2)), 3), np.uint8)
+
+            self.WIDTH += int(num_pixels / 2)
+
+            for col in range(0, original_width):
+                for current_row in range(self.HEIGHT):
+                    left_image[current_row][col] = np.uint8(self.pics[0][current_row][col])
+
+            original_col = 0
+            for col in range((int(num_pixels / 2)), self.WIDTH):
+                for current_row in range(self.HEIGHT):
+                    right_image[current_row][col] = np.uint8(self.pics[1][current_row][original_col])
+                original_col += 1
+
+            self.pics[0] = left_image
+            self.pics[1] = right_image
+
     def whole_image_blend(self):
         for pic in self.pics:
             if len(pic[0]) != self.WIDTH or len(pic) != self.HEIGHT:
@@ -133,6 +167,7 @@ class PicMerge:
         for current_pic_index in range(self.NUM_PICS):
             # Do first things
             if current_pic_index == 0:
+                print('Processing the first image')
                 self.transfer_main_columns(self.pics[current_pic_index], left_main_index_col,
                                            right_main_index_col + 1)
                 self.add_gradient_right(self.pics[current_pic_index], right_main_index_col + 1,
@@ -140,6 +175,7 @@ class PicMerge:
 
             # Do last things
             elif current_pic_index == self.NUM_PICS - 1:
+                print('Processing the last image')
                 self.transfer_main_columns(self.pics[current_pic_index], left_main_index_col,
                                            right_main_index_col + 1)
                 self.add_gradient_left(self.pics[current_pic_index], left_main_index_col - 1,
@@ -147,6 +183,7 @@ class PicMerge:
 
             # Do normal things
             else:
+                print(f'Processing the {current_pic_index + 1}th image')
                 self.transfer_main_columns(self.pics[current_pic_index], left_main_index_col,
                                            right_main_index_col + 1)
                 self.add_gradient_left(self.pics[current_pic_index], left_main_index_col - 1,
@@ -191,7 +228,6 @@ class PicMerge:
                                            right_main_index_col + 1, left_source_main)
                 self.add_gradient_right(self.pics[current_pic_index], right_main_index_col + 1,
                                         right_blend_index_col + 1, right_source_main + 1)
-                save_image(self.blended_pic, 'out')
 
             # Do last things
             elif current_pic_index == self.NUM_PICS - 1:
@@ -210,7 +246,6 @@ class PicMerge:
                 save_image(self.blended_pic, 'out')
                 self.add_gradient_right(self.pics[current_pic_index], right_main_index_col + 1,
                                         right_blend_index_col, right_source_main + 1)
-                save_image(self.blended_pic, 'out')
 
             left_blend_index_col = right_main_index_col + 1
             left_main_index_col = right_blend_index_col + 1
