@@ -9,7 +9,7 @@ import helper
 merge_whole = helper.PicMerge()
 merge_whole.load_pics('pics')
 merge_whole.set_main_width(2000)
-# merge_whole.correct_camera_movement(153)
+#  merge_whole.correct_camera_movement(153)
 # helper.save_image(merge_whole.pics[0], 'out1')
 # helper.save_image(merge_whole.pics[1], 'out2')
 merge_whole.whole_image_blend()

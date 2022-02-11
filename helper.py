@@ -86,7 +86,7 @@ class PicMerge:
 
     def add_gradient_right(self, pic, left_start, right_stop, src_right_start=-1):
         print('Adding Gradient right')
-        # Get percentage of gradient per column
+        # Get percentage of gradient per columns
         gradient_step = 100 / (right_stop - left_start)
         # Get decimal version of the percent
         gradient_step /= 100
