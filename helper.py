@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import os
+import configparser as cp
 
 
 class PicMerge:
@@ -10,9 +11,15 @@ class PicMerge:
         self.BLENDED_WIDTH = -1
         self.BLENDED_HEIGHT = -1
         self.main_width = -1
+        self.main_locations = []
         self.NUM_PICS = -1
         self.blended_pic = []
         self.pics = []
+        self.out_name = ''
+        self.blend_type = ''
+
+        # TODO add a non linear gradient...don't think this will work
+        # TODO add logic to deal with differnet main widths
 
     def load_pics(self, filename):
         files = os.listdir(filename)
@@ -119,9 +126,8 @@ class PicMerge:
 
     # Only works for 2 images
     def correct_camera_movement(self, num_pixels):
-        num_pixels = int(num_pixels)
-        if num_pixels % 2 != 0:
-            num_pixels = int(num_pixels - 1)
+        # I'm too drunk to understand why this works but it needs to multiply by 2 TODO
+        num_pixels = int(num_pixels * 2)
 
         original_width = self.WIDTH
 
@@ -252,6 +258,31 @@ class PicMerge:
             right_main_index_col = left_main_index_col + self.main_width - 1
             right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
 
+    def load_config(self, filename):
+        config = cp.ConfigParser()
+        config.read(filename)
+
+        self.out_name = config['general']['out name']
+
+        match config.get(['general']['type']).strip().lower():
+            case 'stock':
+                if config.getboolean(['general']['variable main widths']):
+                    # Use self.main_width to hold a list with many widths
+                    self.main_width = []
+                    main_widths = config.options('main widths')
+                    for main_width in main_widths:
+                        self.main_width.append(config.getint('main widths', main_width))
+                else:
+                    self.main_width = config.getint('general', 'main width')
+            case 'sslectivestock':
+                print('')
+            case 'panorama':
+                print('')
+        if isinstance(self.main_width, list):
+            print('NOT SURE WHAT TO DO HERE YET')
+        options = config.options('main locations')
+        for option in options:
+            self.main_locations.append(config.getint(['main location'][option]))
 
 def display_image(pic):
     cv.imshow('dst', pic)
@@ -261,3 +292,6 @@ def display_image(pic):
 
 def save_image(pic, name):
     cv.imwrite(f'pics/{name}.png', pic)
+
+
+
