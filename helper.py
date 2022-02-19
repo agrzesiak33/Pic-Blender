@@ -3,9 +3,11 @@ import cv2 as cv
 import os
 import configparser as cp
 
+import helper
+
 
 class PicMerge:
-    def __init__(self):
+    def __init__(self, config_name):
         self.WIDTH = -1
         self.HEIGHT = -1
         self.BLENDED_WIDTH = -1
@@ -18,6 +20,7 @@ class PicMerge:
         self.pics = []
         self.out_name = ''
         self.blend_type = ''
+        self.load_config(config_name)
 
         # TODO add a non linear gradient...don't think this will work
         # TODO add logic to deal with differnet main widths
@@ -59,13 +62,12 @@ class PicMerge:
         print('Transferring main cols')
         if end_column >= self.BLENDED_WIDTH:
             end_column = self.BLENDED_WIDTH - 1
-        height = len(from_pic)
         current_src_col = src_start
         if current_src_col == -1:
             current_src_col = start_column
 
         for current_col in range(start_column, end_column + 1):
-            for current_row in range(height):
+            for current_row in range(self.HEIGHT):
                 self.blended_pic[current_row][current_col] = np.uint8(from_pic[current_row][current_src_col])
             current_src_col += 1
 
@@ -204,7 +206,7 @@ class PicMerge:
             width = self.main_widths[pic]
             width += width % 2
             location = self.main_locations[pic]
-            main_locations.append([location - int(width / 2) - 1, location + int(width / 2) - 1])
+            main_locations.append([location - int(width / 2), location + int(width / 2) - 1])
         # Get the last main column locations
         main_locations.append([self.WIDTH - self.main_widths[-1], self.WIDTH - 1])
 
@@ -316,18 +318,18 @@ class PicMerge:
             right_main_index_col = left_main_index_col + self.main_widths - 1
             right_blend_index_col = right_main_index_col + SLICE_BLEND_WIDTH
 
-    def load_config(self, config_filename, pic_folder):
+    def load_config(self, config_filename):
         config = cp.ConfigParser()
         config.read(config_filename)
 
-        self.load_pics(pic_folder)
+        self.load_pics(config['general']['source folder'])
         self.out_name = config['general']['out name']
 
         # This will work for now TODO
-        if 's' in config.get(['general']['type']).lower():
+        if 's' in config.get('general', 'type').lower():
 
             # If you want variable main widths
-            if config.getboolean(['general']['variable main widths']):
+            if config.getboolean('general', 'variable main widths'):
                 # Use self.main_width to hold a list with many widths
                 self.main_widths = []
                 main_widths = config.options('main widths')
@@ -337,7 +339,7 @@ class PicMerge:
             else:
                 main_width = config.getint('general', 'main width')
                 for pic in range(len(self.pics)):
-                    self.main_widths.append([main_width])
+                    self.main_widths.append(main_width)
 
             # If you want variable main locations
             if config.getboolean('general', 'variable main locations'):
@@ -359,6 +361,9 @@ class PicMerge:
                     self.main_locations.append(current_offset)
                     current_offset += main_offset
                 self.main_locations.append(self.WIDTH - 1)
+
+    def save_image(self):
+        helper.save_image(self.blended_pic, self.out_name)
 
 
 def display_image(pic):
